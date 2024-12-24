@@ -56,3 +56,9 @@ logs
 
 # Cache
 .cache/
+
+# images
+public/images/**/*.jpg
+public/images/**/*.png
+public/images/**/*.gif
+!public/images/**/.gitkeep

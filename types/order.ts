@@ -1,5 +1,3 @@
-import type { OrderStatus } from './enums';
-
 export interface OrderItem {
     id: number;
     name: string;
@@ -10,10 +8,23 @@ export interface OrderItem {
     isVeg: boolean;
 }
 
+export type OrderStatus =
+    | 'PENDING'
+    | 'CONFIRMED'
+    | 'PREPARING'
+    | 'OUT_FOR_DELIVERY'
+    | 'DELIVERED'
+    | 'CANCELLED';
+
 export interface Order {
     _id: string;
     userId: string;
-    items: OrderItem[];
+    items: Array<{
+        id: number;
+        name: string;
+        price: number;
+        quantity: number;
+    }>;
     total: number;
     status: OrderStatus;
     address: string;
@@ -21,6 +32,4 @@ export interface Order {
     paymentMethod: string;
     createdAt: string;
     updatedAt: string;
-}
-
-export type { OrderStatus } from './enums'; 
+} 

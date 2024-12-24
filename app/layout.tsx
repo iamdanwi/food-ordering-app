@@ -1,49 +1,33 @@
-import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { Toaster } from "react-hot-toast";
-import { Providers } from "./providers";
-import { CartProvider } from "@/contexts/CartContext";
+import { ReactNode } from 'react';
+import { Inter } from 'next/font/google';
+import { Toaster } from 'react-hot-toast';
+import { Providers } from '@/components/Providers';
+import './globals.css';
 
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist",
-});
+const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: "FoodManiya - Premium Food Delivery",
-  description: "Experience luxury dining at your doorstep",
+export const metadata = {
+  title: 'Food Ordering App',
+  description: 'Order your favorite food online',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${geist.variable} font-sans`}>
+      <body className={inter.className}>
         <Providers>
-          <CartProvider>
-            <Navbar />
-            <main className="min-h-screen pt-16">
-              {children}
-            </main>
-            <Footer />
-            <Toaster
-              position="top-center"
-              reverseOrder={false}
-              toastOptions={{
-                duration: 3000,
-                style: {
-                  background: '#333',
-                  color: '#fff',
-                },
-              }}
-            />
-          </CartProvider>
+          {children}
+          <Toaster
+            position="top-center"
+            reverseOrder={false}
+            toastOptions={{
+              duration: 3000,
+              style: {
+                background: '#333',
+                color: '#fff',
+              },
+            }}
+          />
         </Providers>
       </body>
     </html>

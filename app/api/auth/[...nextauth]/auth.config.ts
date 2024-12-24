@@ -30,49 +30,75 @@ export const authOptions: AuthOptions = {
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) {
-                    throw new Error("Invalid credentials");
+                try {
+                    if (!credentials?.email || !credentials?.password) {
+                        throw new Error("Invalid credentials");
+                    }
+
+                    await connectToDb();
+
+                    // Debug log
+                    console.log("Looking for user with email:", credentials.email);
+
+                    const user = await User.findOne({ email: credentials.email }).select('+hashedPassword');
+
+                    if (!user) {
+                        console.log("User not found");
+                        throw new Error("Invalid credentials");
+                    }
+
+                    if (!user.hashedPassword) {
+                        console.log("User has no password");
+                        throw new Error("Invalid credentials");
+                    }
+
+                    // Debug log
+                    console.log("Found user:", user._id, "Comparing passwords...");
+
+                    const isPasswordValid = await bcrypt.compare(
+                        credentials.password,
+                        user.hashedPassword
+                    );
+
+                    // Debug log
+                    console.log("Password valid:", isPasswordValid);
+
+                    if (!isPasswordValid) {
+                        throw new Error("Invalid credentials");
+                    }
+
+                    return {
+                        id: user._id.toString(),
+                        email: user.email,
+                        name: user.name,
+                        role: user.role
+                    };
+                } catch (error) {
+                    console.error("Auth error:", error);
+                    throw error;
                 }
-
-                await connectToDb();
-
-                const user = await User.findOne({ email: credentials.email });
-
-                if (!user || !user?.password) {
-                    throw new Error("Invalid credentials");
-                }
-
-                const isCorrectPassword = await bcrypt.compare(
-                    credentials.password,
-                    user.password
-                );
-
-                if (!isCorrectPassword) {
-                    throw new Error("Invalid credentials");
-                }
-
-                return user;
             },
         }),
     ],
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
-                token.role = user.role;
                 token.id = user.id;
+                token.role = user.role;
             }
             return token;
         },
         async session({ session, token }) {
             if (session?.user) {
-                session.user.role = token.role as string | undefined;
-                session.user.id = token.id as string | undefined;
+                session.user.id = token.id as string;
+                session.user.role = token.role as string;
             }
             return session;
         },
     },
     pages: {
         signIn: '/auth/login',
+        error: '/auth/error',
     },
     session: {
         strategy: "jwt",

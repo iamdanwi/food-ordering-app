@@ -5,29 +5,11 @@ import { User } from "@/models/User";
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
-        const { email, name, password } = body;
+        const { name, email, password } = await request.json();
 
-        if (!email || !name || !password) {
+        if (!name || !email || !password) {
             return NextResponse.json(
                 { error: "Missing required fields" },
-                { status: 400 }
-            );
-        }
-
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return NextResponse.json(
-                { error: "Invalid email format" },
-                { status: 400 }
-            );
-        }
-
-        // Validate password length
-        if (password.length < 6) {
-            return NextResponse.json(
-                { error: "Password must be at least 6 characters long" },
                 { status: 400 }
             );
         }
@@ -43,29 +25,25 @@ export async function POST(request: Request) {
             );
         }
 
+        // Hash password with a salt of 12 rounds
         const hashedPassword = await bcrypt.hash(password, 12);
 
-        const user = await User.create({
-            email,
+        // Create user with hashed password
+        await User.create({
             name,
-            hashedPassword,
+            email,
+            hashedPassword, // Store the hashed password
+            role: "USER"
         });
 
         return NextResponse.json(
-            {
-                user: {
-                    id: user._id.toString(),
-                    name: user.name,
-                    email: user.email
-                },
-                message: "User created successfully"
-            },
+            { message: "User registered successfully" },
             { status: 201 }
         );
     } catch (error) {
         console.error("Registration error:", error);
         return NextResponse.json(
-            { error: "An error occurred during registration" },
+            { error: "Failed to register user" },
             { status: 500 }
         );
     }

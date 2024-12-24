@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -14,6 +13,7 @@ const userSchema = new mongoose.Schema({
     hashedPassword: {
         type: String,
         required: true,
+        select: false,
     },
     role: {
         type: String,
@@ -27,10 +27,5 @@ const userSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-
-// Add method to verify password
-userSchema.methods.verifyPassword = async function (password: string) {
-    return bcrypt.compare(password, this.hashedPassword);
-};
 
 export const User = mongoose.models.User || mongoose.model('User', userSchema); 

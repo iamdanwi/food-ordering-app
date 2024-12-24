@@ -33,7 +33,17 @@ export default function LoginPage() {
                 return;
             }
 
-            router.push("/menu");
+            // Fetch user role after successful login
+            const userResponse = await fetch("/api/auth/me");
+            const userData = await userResponse.json();
+
+            // Redirect based on user role
+            if (userData.role === "ADMIN") {
+                router.push("/admin");
+            } else {
+                router.push("/menu");
+            }
+
             router.refresh();
         } catch {
             toast.error("An error occurred during login", {

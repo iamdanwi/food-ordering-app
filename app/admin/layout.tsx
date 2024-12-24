@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import AdminSidebar from '../../components/admin/Sidebar';
+import AdminSidebar from '@/components/admin/Sidebar';
 import { Toaster } from 'react-hot-toast';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

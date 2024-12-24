@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { connectToDb } from "@/lib/mongodb";
 import { Order } from "@/models/Order";
@@ -12,9 +12,14 @@ interface GlobalWithIO extends Global {
 
 export const runtime = 'nodejs';
 
+// Define the route segment config
+type RouteSegmentConfig = {
+    params: { orderId: string };
+};
+
 export async function PATCH(
-    request: NextRequest,
-    context: { params: { orderId: string } }
+    request: Request,
+    { params }: RouteSegmentConfig
 ): Promise<Response> {
     try {
         const session = await getServerSession(authOptions);
@@ -26,7 +31,7 @@ export async function PATCH(
             );
         }
 
-        const { orderId } = context.params;
+        const { orderId } = params;
         const { status } = await request.json() as { status: OrderStatus };
 
         await connectToDb();

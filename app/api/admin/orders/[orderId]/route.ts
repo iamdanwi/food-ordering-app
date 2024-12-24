@@ -12,9 +12,15 @@ interface GlobalWithIO extends Global {
 
 export const runtime = 'nodejs';
 
+// Use Next.js route segment config type
+type Context = {
+    params: { orderId: string }
+    searchParams: { [key: string]: string | string[] | undefined }
+}
+
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { orderId: string } }
+    context: Context
 ): Promise<void | NextResponse> {
     try {
         const session = await getServerSession(authOptions);
@@ -26,7 +32,7 @@ export async function PATCH(
             );
         }
 
-        const { orderId } = params;
+        const { orderId } = context.params;
         const { status } = await request.json() as { status: OrderStatus };
 
         await connectToDb();

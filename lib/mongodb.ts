@@ -12,6 +12,7 @@ interface MongooseCache {
     promise: Promise<typeof mongoose> | null;
 }
 
+// Declare global variable for caching
 declare global {
     // eslint-disable-next-line no-var
     var mongoose: MongooseCache;
@@ -35,7 +36,6 @@ export async function connectToDb() {
     if (!cached.promise) {
         const opts = {
             bufferCommands: false,
-            maxPoolSize: 10,
         };
 
         cached.promise = mongoose.connect(MONGODB_URI!, opts)
@@ -49,12 +49,6 @@ export async function connectToDb() {
                 throw error;
             });
     }
-
-    try {
-        cached.conn = await cached.promise;
-        return cached.conn;
-    } catch (e) {
-        cached.promise = null;
-        throw e;
-    }
+    cached.conn = await cached.promise;
+    return cached.conn;
 } 

@@ -1,5 +1,5 @@
 import MenuGrid from "@/components/menu/MenuGrid";
-import { categories } from "@/data/menu";
+import { categories } from "@/src/data/menu";
 
 export default function MenuPage() {
     return (

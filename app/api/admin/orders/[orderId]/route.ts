@@ -12,9 +12,14 @@ interface GlobalWithIO extends Global {
 
 export const runtime = 'nodejs';
 
+// Define the params interface according to Next.js App Router conventions
+interface RouteParams {
+    orderId: string;
+}
+
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { orderId: string } }
+    context: { params: RouteParams }
 ): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
@@ -26,7 +31,7 @@ export async function PATCH(
             );
         }
 
-        const { orderId } = params;
+        const { orderId } = context.params;
         const { status } = await request.json() as { status: OrderStatus };
 
         await connectToDb();

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { connectToDb } from "@/lib/mongodb";
 import { Order } from "@/models/Order";
@@ -11,8 +11,8 @@ interface GlobalWithIO extends Global {
 }
 
 export async function PATCH(
-    request: Request,
-    { params }: { params: { orderId: string } }
+    request: NextRequest,
+    context: { params: { orderId: string } }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -24,7 +24,7 @@ export async function PATCH(
             );
         }
 
-        const { orderId } = params;
+        const { orderId } = context.params;
         const { status } = await request.json() as { status: OrderStatus };
 
         await connectToDb();

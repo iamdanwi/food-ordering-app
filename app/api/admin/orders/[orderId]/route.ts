@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { connectToDb } from "@/lib/mongodb";
 import { Order } from "@/models/Order";
-import { authOptions } from "../../../auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth.config";
 import type { OrderStatus } from "@/types/order";
 import type { Server } from "socket.io";
 

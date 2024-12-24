@@ -10,9 +10,17 @@ interface GlobalWithIO extends Global {
     io: Server;
 }
 
+interface RequestContext {
+    params: {
+        orderId: string;
+    };
+}
+
+export const runtime = 'edge';
+
 export async function PATCH(
-    request: NextRequest,
-    { params }: { params: { orderId: string } }
+    req: NextRequest,
+    ctx: RequestContext
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -24,8 +32,8 @@ export async function PATCH(
             );
         }
 
-        const { orderId } = params;
-        const { status } = await request.json() as { status: OrderStatus };
+        const { orderId } = ctx.params;
+        const { status } = await req.json() as { status: OrderStatus };
 
         await connectToDb();
 

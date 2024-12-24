@@ -1,80 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { connectToDb } from "@/lib/mongodb";
 import { Order } from "@/models/Order";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth.config";
 
-export async function PUT(
-    request: Request,
-    { params }: { params: { orderId: string } }
-) {
-    try {
-        const session = await getServerSession(authOptions);
-
-        if (!session?.user?.id) {
-            return NextResponse.json(
-                { error: "Not authenticated" },
-                { status: 401 }
-            );
-        }
-
-        const { orderId } = params;
-        const body = await request.json();
-        const { status } = body;
-
-        if (!status) {
-            return NextResponse.json(
-                { error: "Status is required" },
-                { status: 400 }
-            );
-        }
-
-        await connectToDb();
-
-        const order = await Order.findById(orderId);
-
-        if (!order) {
-            return NextResponse.json(
-                { error: "Order not found" },
-                { status: 404 }
-            );
-        }
-
-        if (order.userId !== session.user.id) {
-            return NextResponse.json(
-                { error: "Not authorized" },
-                { status: 403 }
-            );
-        }
-
-        order.status = status;
-        order.updatedAt = new Date();
-        await order.save();
-
-        return NextResponse.json({ message: "Order updated successfully" });
-    } catch (error) {
-        console.error("Order update error:", error);
-        return NextResponse.json(
-            { error: "Failed to update order" },
-            { status: 500 }
-        );
-    }
-}
+export const runtime = 'nodejs';
 
 export async function GET(
-    request: Request,
-    { params }: { params: { orderId: string } }
-) {
+    request: NextRequest,
+    context: { params: Promise<{ orderId: string }> }
+): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
-
-        if (!session?.user?.id) {
-            return NextResponse.json(
-                { error: "Not authenticated" },
-                { status: 401 }
-            );
-        }
-
+        const params = await context.params;
         const { orderId } = params;
 
         await connectToDb();
@@ -88,10 +26,11 @@ export async function GET(
             );
         }
 
-        if (order.userId !== session.user.id) {
+        // Only allow users to view their own orders unless they're an admin
+        if (session?.user?.role !== "ADMIN" && order.userId !== session?.user?.id) {
             return NextResponse.json(
-                { error: "Not authorized" },
-                { status: 403 }
+                { error: "Unauthorized" },
+                { status: 401 }
             );
         }
 

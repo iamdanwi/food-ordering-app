@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import bcrypt from "bcryptjs";
 import { connectToDb } from "@/lib/mongodb";
 import { User } from "@/models/User";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth.config";
 
 export async function PUT(request: Request) {
     try {

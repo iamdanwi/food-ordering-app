@@ -1,8 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSocket } from "@/hooks/useSocket";
-import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import {
@@ -52,39 +51,7 @@ export default function OrderDetailsPage() {
     const [loading, setLoading] = useState(true);
     const { data: session } = useSession();
 
-    useEffect(() => {
-        if (!session) {
-            router.push("/auth/login");
-            return;
-        }
-
-        fetchOrderDetails();
-
-        if (socket) {
-            socket.on('orderStatusUpdated', (data: { orderId: string; status: OrderStatus }) => {
-                if (data.orderId === orderId) {
-                    setOrder(prev => prev ? { ...prev, status: data.status } : null);
-                    toast.success(`Order status updated to ${data.status}`);
-                }
-            });
-
-            socket.on('orderCancelled', (data: { orderId: string }) => {
-                if (data.orderId === orderId) {
-                    setOrder(prev => prev ? { ...prev, status: 'CANCELLED' } : null);
-                    toast.error('Order has been cancelled');
-                }
-            });
-        }
-
-        return () => {
-            if (socket) {
-                socket.off('orderStatusUpdated');
-                socket.off('orderCancelled');
-            }
-        };
-    }, [socket, orderId, session, router]);
-
-    const fetchOrderDetails = async () => {
+    const fetchOrderDetails = useCallback(async () => {
         try {
             const res = await fetch(`/api/orders/${orderId}`);
             const data = await res.json();
@@ -101,7 +68,39 @@ export default function OrderDetailsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [orderId, router]);
+
+    useEffect(() => {
+        if (!session) {
+            router.push("/auth/login");
+            return;
+        }
+
+        fetchOrderDetails();
+
+        if (socket) {
+            socket.on('orderStatusUpdated', (data: { orderId: string; status: OrderStatus }) => {
+                if (data.orderId === orderId) {
+                    setOrder((prev: Order | null) => prev ? { ...prev, status: data.status } : null);
+                    toast.success(`Order status updated to ${data.status}`);
+                }
+            });
+
+            socket.on('orderCancelled', (data: { orderId: string }) => {
+                if (data.orderId === orderId) {
+                    setOrder((prev: Order | null) => prev ? { ...prev, status: 'CANCELLED' } : null);
+                    toast.error('Order has been cancelled');
+                }
+            });
+        }
+
+        return () => {
+            if (socket) {
+                socket.off('orderStatusUpdated');
+                socket.off('orderCancelled');
+            }
+        };
+    }, [socket, orderId, session, router, fetchOrderDetails]);
 
     if (loading) {
         return (
@@ -119,5 +118,26 @@ export default function OrderDetailsPage() {
 
     if (!order) return null;
 
-    // ... rest of the UI component (the same as before)
-}; 
+    return (
+        <div className="min-h-screen bg-secondary-50 dark:bg-secondary-900 pt-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-bold">Order Status</h1>
+                    <div className="flex space-x-4">
+                        {statusSteps.map(({ status, icon: Icon, label }) => (
+                            <div
+                                key={status}
+                                className={`flex items-center ${order.status === status ? 'text-primary-600' : 'text-gray-400'
+                                    }`}
+                            >
+                                <Icon className="h-6 w-6" />
+                                <span className="ml-2">{label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                {/* Rest of your order details UI */}
+            </div>
+        </div>
+    );
+} 

@@ -1,4 +1,4 @@
-import type { Category, MenuItem } from '@/types/menu';
+import type { Category, MenuItem } from '@/src/types/menu';
 
 const allItems: MenuItem[] = [
     {

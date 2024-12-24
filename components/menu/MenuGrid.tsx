@@ -1,5 +1,5 @@
 "use client"
-import { Category } from "@/types/menu";
+import { Category } from "@/src/types/menu";
 import MenuHeader from "./MenuHeader";
 import MenuItem from "./MenuItem";
 

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -60,7 +60,7 @@ export default function AdminDashboard() {
         }
     }, [status, session, router, selectedStatus]);
 
-    const fetchOrders = async () => {
+    const fetchOrders = useCallback(async () => {
         try {
             const url = selectedStatus === "all"
                 ? "/api/admin/orders"
@@ -80,7 +80,13 @@ export default function AdminDashboard() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [selectedStatus]);
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            fetchOrders();
+        }
+    }, [status, session, router, selectedStatus, fetchOrders]);
 
     const updateOrderStatus = async (orderId: string, newStatus: string) => {
         try {

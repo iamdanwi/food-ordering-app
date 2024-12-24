@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import type { MenuItem, CartItem } from "@/types/menu";
+import type { MenuItem, CartItem } from "@/src/types/menu";
 
 type CartContextType = {
     items: CartItem[];

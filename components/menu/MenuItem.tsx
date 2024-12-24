@@ -1,6 +1,6 @@
 "use client"
 import Image from "next/image";
-import { MenuItem as MenuItemType } from "@/types/menu";
+import { MenuItem as MenuItemType } from "@/src/types/menu";
 
 interface MenuItemProps {
     item: MenuItemType;

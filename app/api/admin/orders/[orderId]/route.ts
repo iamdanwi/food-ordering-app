@@ -10,16 +10,9 @@ interface GlobalWithIO extends Global {
     io: Server;
 }
 
-// Define the params type according to Next.js route segment config
-type RouteParams = {
-    params: {
-        orderId: string;
-    };
-};
-
 export async function PATCH(
     request: NextRequest,
-    { params }: RouteParams
+    { params }: { params: { orderId: string } }
 ) {
     try {
         const session = await getServerSession(authOptions);

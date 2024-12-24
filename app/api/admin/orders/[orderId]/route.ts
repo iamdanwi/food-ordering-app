@@ -12,14 +12,9 @@ interface GlobalWithIO extends Global {
 
 export const runtime = 'nodejs';
 
-// Define the route segment config
-type RouteSegmentConfig = {
-    params: { orderId: string };
-};
-
 export async function PATCH(
     request: Request,
-    { params }: RouteSegmentConfig
+    { params }: { params: { orderId: string } }
 ): Promise<Response> {
     try {
         const session = await getServerSession(authOptions);

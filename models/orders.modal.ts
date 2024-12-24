@@ -1,0 +1,1 @@
+// Order modal with userId, items (array of menu items), totalPrice, status (pending, confirmed, completed) fields

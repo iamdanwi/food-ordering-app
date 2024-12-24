@@ -10,19 +10,12 @@ interface GlobalWithIO extends Global {
     io: Server;
 }
 
-// Define the correct context type for App Router
-type RouteContext = {
-    params: {
-        orderId: string;
-    };
-};
-
 export const runtime = 'nodejs';
 
 export async function PATCH(
     request: NextRequest,
-    context: RouteContext
-) {
+    { params }: { params: { orderId: string } }
+): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 
@@ -33,7 +26,7 @@ export async function PATCH(
             );
         }
 
-        const { orderId } = context.params;
+        const { orderId } = params;
         const { status } = await request.json() as { status: OrderStatus };
 
         await connectToDb();

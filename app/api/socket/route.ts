@@ -1,29 +1,33 @@
-import { Server } from 'socket.io';
-import { NextApiResponseWithSocket } from '@/lib/socket';
 import { NextResponse } from 'next/server';
+import { createServer } from 'http';
+import { initSocket } from './socket';
 
-export function GET(req: Request, res: NextApiResponseWithSocket) {
-    if (!res.socket.server.io) {
-        const io = new Server(res.socket.server, {
-            path: '/api/socket',
-            addTrailingSlash: false,
-        });
+export const runtime = 'nodejs';
+
+export async function GET() {
+    try {
+        const httpServer = createServer();
+        const io = initSocket(httpServer);
 
         io.on('connection', (socket) => {
-            console.log('Client connected');
+            console.log('Client connected:', socket.id);
 
-            socket.on('join-order-room', (orderId: string) => {
-                socket.join(`order-${orderId}`);
-                console.log(`Client joined room: order-${orderId}`);
+            socket.on('orderStatusUpdated', (data) => {
+                io.to(`order-${data.orderId}`).emit('orderStatusUpdated', data);
             });
 
             socket.on('disconnect', () => {
-                console.log('Client disconnected');
+                console.log('Client disconnected:', socket.id);
             });
         });
 
-        res.socket.server.io = io;
+        return new NextResponse('Socket.IO server is running', {
+            status: 200,
+        });
+    } catch (error) {
+        console.error('Socket initialization error:', error);
+        return new NextResponse('Failed to initialize Socket.IO server', {
+            status: 500,
+        });
     }
-
-    return NextResponse.json({ success: true });
 } 

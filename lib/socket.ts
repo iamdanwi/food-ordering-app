@@ -1,31 +1,27 @@
-import { Server as NetServer } from 'http';
-import { Server as SocketIOServer, Socket } from 'socket.io';
-import { NextApiResponse } from 'next';
+import { io, Socket } from 'socket.io-client';
 
-export type NextApiResponseWithSocket = NextApiResponse & {
-    socket: {
-        server: NetServer & {
-            io?: SocketIOServer;
-        };
-    };
+let socket: Socket;
+
+export const initializeSocket = () => {
+    socket = io({
+        path: '/api/socket',
+        addTrailingSlash: false,
+    });
+
+    socket.on('connect', () => {
+        console.log('Connected to Socket.IO server');
+    });
+
+    socket.on('connect_error', (err) => {
+        console.error('Socket connection error:', err);
+    });
+
+    return socket;
 };
 
-export const initSocket = (res: NextApiResponseWithSocket) => {
-    if (!res.socket.server.io) {
-        const io = new SocketIOServer(res.socket.server);
-        res.socket.server.io = io;
-
-        io.on('connection', (socket: Socket) => {
-            console.log('Client connected');
-
-            socket.on('join-order-room', (orderId: string) => {
-                socket.join(`order-${orderId}`);
-            });
-
-            socket.on('disconnect', () => {
-                console.log('Client disconnected');
-            });
-        });
+export const getSocket = () => {
+    if (!socket) {
+        return initializeSocket();
     }
-    return res.socket.server.io;
+    return socket;
 }; 

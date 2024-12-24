@@ -14,7 +14,7 @@ export const runtime = 'nodejs';
 
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { orderId: string } }
+    { params }: { params: Promise<{ orderId: string }> }
 ): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
@@ -26,7 +26,8 @@ export async function PATCH(
             );
         }
 
-        const { orderId } = params;
+        const resolvedParams = await params;
+        const { orderId } = resolvedParams;
         const { status } = await request.json() as { status: OrderStatus };
 
         await connectToDb();

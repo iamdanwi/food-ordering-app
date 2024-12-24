@@ -1,4 +1,5 @@
 "use client"
+import Image from "next/image";
 import { MenuItem as MenuItemType } from "@/types/menu";
 
 interface MenuItemProps {
@@ -8,11 +9,15 @@ interface MenuItemProps {
 export default function MenuItem({ item }: MenuItemProps) {
     return (
         <div className="card">
-            <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-48 object-cover rounded-t-lg"
-            />
+            <div className="relative w-full h-48">
+                <Image
+                    src={item.image}
+                    alt={item.name}
+                    fill
+                    className="object-cover rounded-t-lg"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+            </div>
             <div className="p-4">
                 <h3 className="text-lg font-semibold">{item.name}</h3>
                 <p className="text-secondary-600">{item.description}</p>

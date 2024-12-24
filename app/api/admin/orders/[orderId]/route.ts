@@ -12,16 +12,10 @@ interface GlobalWithIO extends Global {
 
 export const runtime = 'nodejs';
 
-type Props = {
-    params: {
-        orderId: string;
-    };
-};
-
 export async function PATCH(
     request: NextRequest,
-    props: Props
-): Promise<NextResponse> {
+    { params }: { params: { orderId: string } }
+): Promise<void | NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 
@@ -32,7 +26,7 @@ export async function PATCH(
             );
         }
 
-        const { orderId } = props.params;
+        const { orderId } = params;
         const { status } = await request.json() as { status: OrderStatus };
 
         await connectToDb();
